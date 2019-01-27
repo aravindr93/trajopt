@@ -48,3 +48,19 @@ class Trajectory:
             self.env.set_env_state(self.sol_state[k])
             self.env.step(self.sol_act[k])
         self.env.mujoco_render_frames = False
+
+    def animate_result_offscreen(self, save_loc='/tmp/', filename='newvid', frame_size=(640,480), camera_id=0):
+        import skvideo.io
+        # self.env.mujoco_render_frames = True
+        arrs = []
+        for k in range(len(self.sol_act)):
+            self.env.set_env_state(self.sol_state[k])
+            self.env.step(self.sol_act[k])
+            curr_frame = self.env.sim.render(width=frame_size[0], height=frame_size[1], camera_id=camera_id)
+            arrs.append(curr_frame)
+            print(k, end=', ', flush=True)
+
+        file_name = save_loc + filename + ".mp4"
+        skvideo.io.vwrite( file_name, np.asarray(arrs))
+        print("saved", file_name)
+        # self.mujoco_render_frames = False
