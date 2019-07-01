@@ -1,5 +1,6 @@
 from trajopt.algos.mppi import MPPI
 from trajopt.envs.utils import get_environment
+from tqdm import tqdm
 import time as timer
 import numpy as np
 import pickle
@@ -9,22 +10,23 @@ ENV_NAME = 'continual_reacher_7dof'
 PICKLE_FILE = ENV_NAME + '_mppi.pickle'
 SEED = 12345
 H_total = 500
+N_ITER = 1
 # =======================================
 
 e = get_environment(ENV_NAME)
+e.reset_model(seed=SEED)
 mean = np.zeros(e.action_dim)
 sigma = 1.0*np.ones(e.action_dim)
-filter_coefs = [sigma, 0.25, 0.0, 0.0]
+filter_coefs = [sigma, 0.25, 0.8, 0.0]
 
-agent = MPPI(e, H=16, paths_per_cpu=8, num_cpu=6,
+agent = MPPI(e, H=16, paths_per_cpu=40, num_cpu=1,
              kappa=25.0, gamma=1.0, mean=mean, filter_coefs=filter_coefs,
              default_act='mean', seed=SEED)
 
 ts = timer.time()
-for t in range(H_total):
-    print("Agent timestep : %i" % t)
-    agent.train_step()
-    if t % 25 == 0 and t > 0:
+for t in tqdm(range(H_total)):
+    agent.train_step(niter=N_ITER)
+    if t % 50 == 0 and t > 0:
         print("==============>>>>>>>>>>> saving progress ")
         pickle.dump(agent, open(PICKLE_FILE, 'wb'))
 

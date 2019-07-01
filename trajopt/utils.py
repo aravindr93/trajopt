@@ -9,10 +9,10 @@ from trajopt.envs.utils import get_environment
 
 def do_env_rollout(env_name, start_state, act_list):
     """
-    Construct env with given name and set it to the start state
-    The make rollouts using the act_list
-    act_list is a list with each element having size (H, m). \
-    len of act_list is number of rollouts
+        1) Construct env with env_name and set it to start_state.
+        2) Generate rollouts using act_list.
+           act_list is a list with each element having size (H,m).
+           Length of act_list is the number of desired rollouts.
     """
     e = get_environment(env_name)
     e.reset_model()

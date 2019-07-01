@@ -1,5 +1,7 @@
 """
-Basic Model Predictive Path Integral
+This implements a shooting trajectory optimization algorithm.
+The closest known algorithm is perhaps MPPI and hence we stick to that terminology.
+Uses a filtered action sequence to generate smooth motions.
 """
 
 import numpy as np
@@ -46,7 +48,10 @@ class MPPI(Trajectory):
         # blend the action sequence
         weighted_seq = S*act.T
         act_sequence = np.sum(weighted_seq.T, axis=0)/(np.sum(S) + 1e-6)
+        self.act_sequence = act_sequence
 
+    def advance_time(self, act_sequence=None):
+        act_sequence = self.act_sequence if act_sequence is None else act_sequence
         # accept first action and step
         self.sol_act.append(act_sequence[0])
         state_now = self.sol_state[-1].copy()
@@ -82,7 +87,9 @@ class MPPI(Trajectory):
                                       )
         return paths
 
-    def train_step(self):
+    def train_step(self, niter=1):
         t = len(self.sol_state) - 1
-        paths = self.do_rollouts(self.seed+t)
-        self.update(paths)
+        for _ in range(niter):
+            paths = self.do_rollouts(self.seed+t)
+            self.update(paths)
+        self.advance_time()
