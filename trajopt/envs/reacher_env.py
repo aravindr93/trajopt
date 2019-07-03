@@ -37,6 +37,10 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.env_timestep += 1
         return ob, reward, False, self.get_env_infos()
 
+    def step(self, a):
+        # overloading to preserve backwards compatibility
+        return self._step(a)
+
     def _get_obs(self):
         return np.concatenate([
             self.data.qpos.flat,
