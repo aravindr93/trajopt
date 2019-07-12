@@ -5,7 +5,6 @@ from trajopt.envs.reacher_env import Reacher7DOFEnv
 class ContinualReacher7DOFEnv(Reacher7DOFEnv):
     def __init__(self):
         super().__init__()
-        self.env_name = 'continual_reacher_7dof'
 
     def _step(self, a):
         self.do_simulation(a, self.frame_skip)

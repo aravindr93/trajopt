@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 
 # =======================================
-ENV_NAME = 'continual_reacher_7dof'
+ENV_NAME = 'trajopt_continual_reacher-v0'
 PICKLE_FILE = ENV_NAME + '_mppi.pickle'
 SEED = 12345
 H_total = 500
@@ -14,7 +14,7 @@ N_ITER = 1
 # =======================================
 
 e = get_environment(ENV_NAME)
-e.reset_model(seed=SEED)
+e.reset(seed=SEED)
 mean = np.zeros(e.action_dim)
 sigma = 1.0*np.ones(e.action_dim)
 filter_coefs = [sigma, 0.25, 0.8, 0.0]

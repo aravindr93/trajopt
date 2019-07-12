@@ -33,18 +33,29 @@ class Trajectory:
         and animates a given action sequence
         """
         self.env.set_env_state(self.sol_state[t])
-        self.env.mujoco_render_frames = True
         for k in range(act.shape[0]):
-            # self.env.mj_render()
+            try:
+                self.env.env.env.mujoco_render_frames = True
+            except AttributeError:
+                self.env.render()
             self.env.set_env_state(self.sol_state[t+k])
             self.env.step(act[k])
             print(self.env.env_timestep)
             print(self.env.real_step)
-        self.env.mujoco_render_frames = False
+        try:
+            self.env.env.env.mujoco_render_frames = False
+        except:
+            pass
 
     def animate_result(self):
-        self.env.mujoco_render_frames = True
         for k in range(len(self.sol_act)):
             self.env.set_env_state(self.sol_state[k])
+            try:
+                self.env.env.env.mujoco_render_frames = True
+            except:
+                self.env.render()
             self.env.step(self.sol_act[k])
-        self.env.mujoco_render_frames = False
+        try:
+            self.env.env.env.mujoco_render_frames = False
+        except:
+            pass

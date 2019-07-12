@@ -1,6 +1,7 @@
 import numpy as np
 from gym import utils
-from trajopt.envs import mujoco_env
+# from trajopt.envs import mujoco_env
+from mjrl.envs import mujoco_env
 from mujoco_py import MjViewer
 import os
 
@@ -8,7 +9,6 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
 
         # trajopt specific attributes
-        self.env_name = 'reacher_7dof'
         self.seeding = False
         self.real_step = True
         self.env_timestep = 0
@@ -104,4 +104,4 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.trackbodyid = 1
         self.viewer.cam.type = 1
         self.sim.forward()
-        self.viewer.cam.distance = self.model.stat.extent * 1.2
+        self.viewer.cam.distance = self.model.stat.extent * 1.5

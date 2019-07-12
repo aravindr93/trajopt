@@ -34,9 +34,11 @@ class MPPI(Trajectory):
         self.sol_reward = []
         self.sol_obs = []
 
-        self.env.reset_model(seed=self.seed)
+        self.env.reset()
+        self.env.set_seed(seed)
+        self.env.reset(seed=seed)
         self.sol_state.append(self.env.get_env_state().copy())
-        self.sol_obs.append(self.env._get_obs())
+        self.sol_obs.append(self.env.get_obs())
         self.act_sequence = np.ones((self.H, self.m)) * self.mean
 
     def update(self, paths):
@@ -58,7 +60,7 @@ class MPPI(Trajectory):
         self.env.set_env_state(state_now)
         _, r, _, _ = self.env.step(act_sequence[0])
         self.sol_state.append(self.env.get_env_state().copy())
-        self.sol_obs.append(self.env._get_obs())
+        self.sol_obs.append(self.env.get_obs())
         self.sol_reward.append(r)
 
         # get updated action sequence
@@ -77,7 +79,7 @@ class MPPI(Trajectory):
         return scores
 
     def do_rollouts(self, seed):
-        paths = gather_paths_parallel(self.env.env_name,
+        paths = gather_paths_parallel(self.env.env_id,
                                       self.sol_state[-1],
                                       self.act_sequence,
                                       self.filter_coefs,

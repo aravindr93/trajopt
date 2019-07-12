@@ -7,16 +7,16 @@ import multiprocessing as mp
 from trajopt import tensor_utils
 from trajopt.envs.utils import get_environment
 
-def do_env_rollout(env_name, start_state, act_list):
+def do_env_rollout(env_id, start_state, act_list):
     """
-        1) Construct env with env_name and set it to start_state.
+        1) Construct env with env_id and set it to start_state.
         2) Generate rollouts using act_list.
            act_list is a list with each element having size (H,m).
            Length of act_list is the number of desired rollouts.
     """
-    e = get_environment(env_name)
-    e.reset_model()
-    e.real_step = False
+    e = get_environment(env_id)
+    e.reset()
+    e.real_env_step(False)
     paths = []
     H = act_list[0].shape[0]
     N = len(act_list)
@@ -29,7 +29,7 @@ def do_env_rollout(env_name, start_state, act_list):
         states = []
 
         for k in range(H):
-            obs.append(e._get_obs())
+            obs.append(e.get_obs())
             act.append(act_list[i][k])
             env_infos.append(e.get_env_infos())
             states.append(e.get_env_state())
@@ -70,7 +70,7 @@ def generate_perturbed_actions(base_act, filter_coefs):
     return base_act + eps
 
 
-def generate_paths(env_name, start_state, N, base_act, filter_coefs, base_seed):
+def generate_paths(env_id, start_state, N, base_act, filter_coefs, base_seed):
     """
     first generate enough perturbed actions
     then do rollouts with generated actions
@@ -81,7 +81,7 @@ def generate_paths(env_name, start_state, N, base_act, filter_coefs, base_seed):
     for i in range(N):
         act = generate_perturbed_actions(base_act, filter_coefs)
         act_list.append(act)
-    paths = do_env_rollout(env_name, start_state, act_list)
+    paths = do_env_rollout(env_id, start_state, act_list)
     return paths
 
 
@@ -89,12 +89,12 @@ def generate_paths_star(args_list):
     return generate_paths(*args_list)
 
 
-def gather_paths_parallel(env_name, start_state, base_act, filter_coefs, base_seed, paths_per_cpu, num_cpu=None):
+def gather_paths_parallel(env_id, start_state, base_act, filter_coefs, base_seed, paths_per_cpu, num_cpu=None):
     num_cpu = mp.cpu_count() if num_cpu is None else num_cpu
     args_list = []
     for i in range(num_cpu):
         cpu_seed = base_seed + i*paths_per_cpu
-        args_list_cpu = [env_name, start_state, paths_per_cpu, base_act, filter_coefs, cpu_seed]
+        args_list_cpu = [env_id, start_state, paths_per_cpu, base_act, filter_coefs, cpu_seed]
         args_list.append(args_list_cpu)
 
     # do multiprocessing

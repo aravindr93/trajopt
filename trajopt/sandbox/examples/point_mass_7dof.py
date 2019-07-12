@@ -6,9 +6,9 @@ import numpy as np
 import pickle
 
 # =======================================
-ENV_NAME = 'trajopt_reacher-v0'
+ENV_NAME = 'mjrl_point_mass-v0'
 PICKLE_FILE = ENV_NAME + '_mppi.pickle'
-SEED = 12345
+SEED = 123
 N_ITER = 1
 H_total = 100
 # =======================================
@@ -17,10 +17,10 @@ e = get_environment(ENV_NAME)
 e.reset(seed=SEED)
 mean = np.zeros(e.action_dim)
 sigma = 1.0*np.ones(e.action_dim)
-filter_coefs = [sigma, 0.25, 0.8, 0.0]
+filter_coefs = [sigma, 0.1, 0.0, 0.0]
 
-agent = MPPI(e, H=16, paths_per_cpu=25, num_cpu=1,
-             kappa=5.0, gamma=1.0, mean=mean, filter_coefs=filter_coefs,
+agent = MPPI(e, H=5, paths_per_cpu=25, num_cpu=1,
+             kappa=10.0, gamma=1.0, mean=mean, filter_coefs=filter_coefs,
              default_act='mean', seed=SEED)
 
 ts = timer.time()

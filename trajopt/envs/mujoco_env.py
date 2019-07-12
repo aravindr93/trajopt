@@ -1,9 +1,3 @@
-"""
-This is a class structure for mujoco environments.
-Base functions inherited from gym.
-Additional functions needed for trajectory optimization algorithms are included.
-"""
-
 import os
 
 from gym import error, spaces
@@ -11,6 +5,7 @@ from gym.utils import seeding
 import numpy as np
 from os import path
 import gym
+import six
 import time as timer
 
 try:
@@ -22,9 +17,9 @@ except ImportError as e:
 class MujocoEnv(gym.Env):
     """Superclass for all MuJoCo environments.
     """
-
     def __init__(self, model_path, frame_skip):
 
+        bug()
         if model_path.startswith("/"):
             fullpath = model_path
         else:
@@ -80,20 +75,17 @@ class MujocoEnv(gym.Env):
         """
         pass
 
-    def get_env_state(self):
+    def viewer_setup(self):
         """
-        Get full state of the environment beyond qpos and qvel
-        For example, if targets are defined using sites, this function should also
-        contain location of the sites (which are not included in qpos).
-        Must return a dictionary that can be used in the set_env_state function
+        Does not work. Use mj_viewer_setup() instead
         """
-        raise NotImplementedError
+        pass
 
-    def set_env_state(self, state):
+    def evaluate_success(self, paths, logger=None):
         """
-        Uses the state dictionary to set the state of the world
+        Log various success metrics calculated based on input paths into the logger
         """
-        raise NotImplementedError
+        pass
 
     # -----------------------------
 
@@ -134,8 +126,17 @@ class MujocoEnv(gym.Env):
             #self.viewer._run_speed /= self.frame_skip
             self.viewer.render()
 
+    def render(self, *args, **kwargs):
+        pass
+        #return self.mj_render()
+
+    def _render(self, *args, **kwargs):
+        pass
+        #return self.mj_render()
+
     def _get_viewer(self):
-        return None
+        pass
+        #return None
 
     def state_vector(self):
         state = self.sim.get_state()
