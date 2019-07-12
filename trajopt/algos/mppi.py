@@ -55,10 +55,9 @@ class MPPI(Trajectory):
     def advance_time(self, act_sequence=None):
         act_sequence = self.act_sequence if act_sequence is None else act_sequence
         # accept first action and step
-        self.sol_act.append(act_sequence[0])
-        state_now = self.sol_state[-1].copy()
-        self.env.set_env_state(state_now)
-        _, r, _, _ = self.env.step(act_sequence[0])
+        action = act_sequence[0].copy()
+        _, r, _, _ = self.env.step(action)
+        self.sol_act.append(action)
         self.sol_state.append(self.env.get_env_state().copy())
         self.sol_obs.append(self.env.get_obs())
         self.sol_reward.append(r)

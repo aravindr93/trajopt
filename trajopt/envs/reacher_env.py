@@ -80,14 +80,18 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def get_env_state(self):
         target_pos = self.model.site_pos[self.target_sid].copy()
         return dict(qp=self.data.qpos.copy(), qv=self.data.qvel.copy(),
+                    qa=self.data.qacc.copy(),
                     target_pos=target_pos, timestep=self.env_timestep)
 
     def set_env_state(self, state):
         self.sim.reset()
         qp = state['qp'].copy()
         qv = state['qv'].copy()
+        qa = state['qa'].copy()
         target_pos = state['target_pos']
-        self.set_state(qp, qv)
+        self.data.qpos[:] = qp
+        self.data.qvel[:] = qv
+        self.data.qacc[:] = qa
         self.model.site_pos[self.target_sid] = target_pos
         self.env_timestep = state['timestep']
         self.sim.forward()
