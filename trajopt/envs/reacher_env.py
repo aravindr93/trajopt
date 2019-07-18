@@ -31,8 +31,9 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
         hand_pos = self.data.site_xpos[self.hand_sid]
         target_pos = self.data.site_xpos[self.target_sid]
-        dist = np.linalg.norm(hand_pos-target_pos)
-        reward = - 10.0 * dist - 0.25 * np.linalg.norm(self.data.qvel)
+        l1_dist = np.sum(np.abs(hand_pos - target_pos))
+        l2_dist = np.linalg.norm(hand_pos-target_pos)
+        reward = - 5.0 * l1_dist - l2_dist - 1e-3 * np.linalg.norm(self.data.qvel)
         ob = self._get_obs()
         # keep track of env timestep (needed for continual envs)
         self.env_timestep += 1
