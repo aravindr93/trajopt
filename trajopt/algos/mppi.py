@@ -16,11 +16,13 @@ class MPPI(Trajectory):
                  mean=None,
                  filter_coefs=None,
                  default_act='repeat',
+                 warmstart=True,
                  seed=123,
                  ):
         self.env, self.seed = env, seed
         self.n, self.m = env.observation_dim, env.action_dim
         self.H, self.paths_per_cpu, self.num_cpu = H, paths_per_cpu, num_cpu
+        self.warmstart = warmstart
 
         self.mean, self.filter_coefs, self.kappa, self.gamma = mean, filter_coefs, kappa, gamma
         if mean is None:
@@ -40,6 +42,7 @@ class MPPI(Trajectory):
         self.sol_state.append(self.env.get_env_state().copy())
         self.sol_obs.append(self.env.get_obs())
         self.act_sequence = np.ones((self.H, self.m)) * self.mean
+        self.init_act_sequence = self.act_sequence.copy()
 
     def update(self, paths):
         num_traj = len(paths)
@@ -63,11 +66,14 @@ class MPPI(Trajectory):
         self.sol_reward.append(r)
 
         # get updated action sequence
-        self.act_sequence[:-1] = act_sequence[1:]
-        if self.default_act == 'repeat':
-            self.act_sequence[-1] = self.act_sequence[-2]
+        if self.warmstart:
+            self.act_sequence[:-1] = act_sequence[1:]
+            if self.default_act == 'repeat':
+                self.act_sequence[-1] = self.act_sequence[-2]
+            else:
+                self.act_sequence[-1] = self.mean.copy()
         else:
-            self.act_sequence[-1] = self.mean.copy()
+            self.act_sequence = self.init_act_sequence.copy()
 
     def score_trajectory(self, paths):
         scores = np.zeros(len(paths))
