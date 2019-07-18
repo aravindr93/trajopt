@@ -5,6 +5,7 @@ from mjrl.envs import mujoco_env
 from mujoco_py import MjViewer
 import os
 
+
 class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
 
@@ -58,10 +59,10 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def target_reset(self):
         target_pos = np.array([0.1, 0.1, 0.1])
-        if self.seeding is True:
-            target_pos[0] = self.np_random.uniform(low=-0.3, high=0.3)
-            target_pos[1] = self.np_random.uniform(low=-0.2, high=0.2)
-            target_pos[2] = self.np_random.uniform(low=-0.25, high=0.25)
+        # if self.seeding is True:
+        target_pos[0] = self.np_random.uniform(low=-0.3, high=0.3)
+        target_pos[1] = self.np_random.uniform(low=-0.2, high=0.2)
+        target_pos[2] = self.np_random.uniform(low=-0.25, high=0.25)
         self.model.site_pos[self.target_sid] = target_pos
         self.sim.forward()
 

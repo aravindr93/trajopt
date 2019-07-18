@@ -9,7 +9,7 @@ from gym.envs.registration import register
 register(
     id='trajopt_reacher-v0',
     entry_point='trajopt.envs:Reacher7DOFEnv',
-    max_episode_steps=100,
+    max_episode_steps=75,
 )
 
 register(
