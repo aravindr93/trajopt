@@ -48,9 +48,9 @@ class Trajectory:
             pass
 
     def animate_result(self):
+        self.env.reset(self.seed)
         self.env.set_env_state(self.sol_state[0])
         for k in range(len(self.sol_act)):
-            # self.env.set_env_state(self.sol_state[k])
             self.env.env.env.mujoco_render_frames = True
             self.env.render()
             self.env.step(self.sol_act[k])

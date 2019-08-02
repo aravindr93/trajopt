@@ -59,6 +59,7 @@ class MPPI(Trajectory):
         act_sequence = self.act_sequence if act_sequence is None else act_sequence
         # accept first action and step
         action = act_sequence[0].copy()
+        self.env.real_env_step(True)
         _, r, _, _ = self.env.step(action)
         self.sol_act.append(action)
         self.sol_state.append(self.env.get_env_state().copy())
