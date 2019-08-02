@@ -21,7 +21,7 @@ The algorithms assume an environment abstraction similar to OpenAI `gym`, but re
 - `set_env_state(state_dict)` should take in a dictionary, and use the contents of the dictionary to recreate the scene specified by the dictionary.
 The example [reacher environment](https://github.com/aravindr93/trajopt/blob/redesign/trajopt/envs/reacher_env.py) has an illustrative.
 
-For using the algorithm to run an example, see illustrative examples at [`trajopt/sandbox/examples`](https://github.com/aravindr93/trajopt/tree/master/trajopt/sandbox/examples).
+For using the algorithm to run an example, see illustrative examples in [`examples`](https://github.com/aravindr93/trajopt/tree/master/examples).
 
 # Bibliography
 If you find the package useful, please cite the following paper.

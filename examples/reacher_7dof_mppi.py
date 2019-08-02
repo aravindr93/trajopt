@@ -10,7 +10,7 @@ ENV_NAME = 'trajopt_reacher-v0'
 PICKLE_FILE = ENV_NAME + '_mppi.pickle'
 SEED = 12345
 N_ITER = 1
-H_total = 100
+H_total = 75
 # =======================================
 
 e = get_environment(ENV_NAME)
@@ -26,7 +26,7 @@ agent = MPPI(e, H=16, paths_per_cpu=25, num_cpu=1,
 ts = timer.time()
 for t in tqdm(range(H_total)):
     agent.train_step(niter=N_ITER)
-    if t % 25 == 0 and t > 0:
+    if t % 75 == 0 and t > 0:
         print("==============>>>>>>>>>>> saving progress ")
         pickle.dump(agent, open(PICKLE_FILE, 'wb'))
 

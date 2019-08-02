@@ -9,8 +9,8 @@ import pickle
 ENV_NAME = 'trajopt_continual_reacher-v0'
 PICKLE_FILE = ENV_NAME + '_mppi.pickle'
 SEED = 12345
-H_total = 500
 N_ITER = 1
+H_total = 500
 # =======================================
 
 e = get_environment(ENV_NAME)
@@ -19,14 +19,14 @@ mean = np.zeros(e.action_dim)
 sigma = 1.0*np.ones(e.action_dim)
 filter_coefs = [sigma, 0.25, 0.8, 0.0]
 
-agent = MPPI(e, H=16, paths_per_cpu=40, num_cpu=1,
-             kappa=25.0, gamma=1.0, mean=mean, filter_coefs=filter_coefs,
+agent = MPPI(e, H=10, paths_per_cpu=25, num_cpu=1,
+             kappa=5.0, gamma=1.0, mean=mean, filter_coefs=filter_coefs,
              default_act='mean', seed=SEED)
 
 ts = timer.time()
 for t in tqdm(range(H_total)):
     agent.train_step(niter=N_ITER)
-    if t % 50 == 0 and t > 0:
+    if t % 100 == 0 and t > 0:
         print("==============>>>>>>>>>>> saving progress ")
         pickle.dump(agent, open(PICKLE_FILE, 'wb'))
 
