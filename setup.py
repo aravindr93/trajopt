@@ -18,6 +18,11 @@ setup(
     url='https://github.com/aravindr93/trajopt.git',
     author='Aravind Rajeswaran',
     install_requires=[
-        'click', 'gym>=0.9.3', 'mujoco_py>=1.50.1.35', 'termcolor', 'tqdm', 'numpy'
+        'click', 
+        'gym>=0.13', 
+        'mujoco_py>=2.0',
+        'termcolor', 
+        'tqdm', 
+        'numpy',
     ],
 )
