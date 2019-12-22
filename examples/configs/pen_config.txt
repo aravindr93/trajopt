@@ -1,0 +1,16 @@
+{
+    'env_name'          :       'pen-v0',
+    'H_total'           :       75,
+    'num_traj'          :       100,
+    'seed'              :       123,
+    'num_iter'          :       1,
+    'plan_horizon'      :       32,
+    'paths_per_cpu'     :       10,
+    'num_cpu'           :       16,
+    'filter'            :       {'beta_0': 0.25, 'beta_1': 0.8, 'beta_2': 0.0},
+    'kappa'             :       1.0,
+    'gamma'             :       1.0,
+    'default_act'       :       'mean',
+    'debug_mode'        :       False,
+    'exp_notes'         :       'First run for Lyceum paper',
+}
