@@ -12,7 +12,7 @@ import pickle
 import gym
 import mjrl.envs
 import trajopt.envs
-import mj_envs
+#import mj_envs
 import argparse
 import json
 import os
