@@ -11,13 +11,18 @@ def read(fname):
 
 setup(
     name='trajopt',
-    version='0.1.0',
+    version='1.0.0',
     packages=find_packages(),
     description='Trajectory optimization algorithms for environments in MuJoCo',
     long_description=read('README.md'),
     url='https://github.com/aravindr93/trajopt.git',
     author='Aravind Rajeswaran',
     install_requires=[
-        'click', 'gym==0.12', 'mujoco_py>=1.50.1.35', 'termcolor',
+        'click', 
+        'gym>=0.13', 
+        'mujoco_py>=2.0',
+        'termcolor', 
+        'tqdm', 
+        'numpy',
     ],
 )

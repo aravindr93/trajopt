@@ -10,6 +10,8 @@
       <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
       <geom name="table" type="plane" pos="0 0.5 -0.425" size="1 1 0.1" rgba="0.8 0.8 0.8 1.0" contype="1" conaffinity="1"/>
 
+      <site name="target" pos="0.1 0.1 0.1" rgba="0.2 0.6 0.2 0.25" size=".05" type="sphere" />
+
       <body name="r_shoulder_pan_link" pos="0 -0.6 0">
          <geom name="e1"  type="sphere" rgba="0.6 0.6 0.6 1" pos="-0.06 0.05 0.2" size="0.05" />
          <geom name="e2"  type="sphere" rgba="0.6 0.6 0.6 1" pos=" 0.06 0.05 0.2" size="0.05" />
@@ -68,8 +70,6 @@
             </body>
          </body>
       </body>
-
-      <site name="target" pos="0 0 0" rgba="0.2 0.6 0.2 0.25" size=".05" type="sphere" />
 
       <!--<body name="goal" pos="0 0 0" >-->
          <!--<geom name="goal" rgba="1 0.86 0.5 1" type="sphere" size="0.05" conaffinity="0" contype="0"/>-->

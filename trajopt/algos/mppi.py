@@ -16,11 +16,13 @@ class MPPI(Trajectory):
                  mean=None,
                  filter_coefs=None,
                  default_act='repeat',
+                 warmstart=True,
                  seed=123,
                  ):
         self.env, self.seed = env, seed
         self.n, self.m = env.observation_dim, env.action_dim
         self.H, self.paths_per_cpu, self.num_cpu = H, paths_per_cpu, num_cpu
+        self.warmstart = warmstart
 
         self.mean, self.filter_coefs, self.kappa, self.gamma = mean, filter_coefs, kappa, gamma
         if mean is None:
@@ -34,10 +36,13 @@ class MPPI(Trajectory):
         self.sol_reward = []
         self.sol_obs = []
 
-        self.env.reset_model(seed=self.seed)
+        self.env.reset()
+        self.env.set_seed(seed)
+        self.env.reset(seed=seed)
         self.sol_state.append(self.env.get_env_state().copy())
-        self.sol_obs.append(self.env._get_obs())
+        self.sol_obs.append(self.env.get_obs())
         self.act_sequence = np.ones((self.H, self.m)) * self.mean
+        self.init_act_sequence = self.act_sequence.copy()
 
     def update(self, paths):
         num_traj = len(paths)
@@ -53,20 +58,23 @@ class MPPI(Trajectory):
     def advance_time(self, act_sequence=None):
         act_sequence = self.act_sequence if act_sequence is None else act_sequence
         # accept first action and step
-        self.sol_act.append(act_sequence[0])
-        state_now = self.sol_state[-1].copy()
-        self.env.set_env_state(state_now)
-        _, r, _, _ = self.env.step(act_sequence[0])
+        action = act_sequence[0].copy()
+        self.env.real_env_step(True)
+        _, r, _, _ = self.env.step(action)
+        self.sol_act.append(action)
         self.sol_state.append(self.env.get_env_state().copy())
-        self.sol_obs.append(self.env._get_obs())
+        self.sol_obs.append(self.env.get_obs())
         self.sol_reward.append(r)
 
         # get updated action sequence
-        self.act_sequence[:-1] = act_sequence[1:]
-        if self.default_act == 'repeat':
-            self.act_sequence[-1] = self.act_sequence[-2]
+        if self.warmstart:
+            self.act_sequence[:-1] = act_sequence[1:]
+            if self.default_act == 'repeat':
+                self.act_sequence[-1] = self.act_sequence[-2]
+            else:
+                self.act_sequence[-1] = self.mean.copy()
         else:
-            self.act_sequence[-1] = self.mean.copy()
+            self.act_sequence = self.init_act_sequence.copy()
 
     def score_trajectory(self, paths):
         scores = np.zeros(len(paths))
@@ -77,7 +85,7 @@ class MPPI(Trajectory):
         return scores
 
     def do_rollouts(self, seed):
-        paths = gather_paths_parallel(self.env.env_name,
+        paths = gather_paths_parallel(self.env.env_id,
                                       self.sol_state[-1],
                                       self.act_sequence,
                                       self.filter_coefs,
