@@ -50,8 +50,41 @@ class Trajectory:
     def animate_result(self):
         self.env.reset(self.seed)
         self.env.set_env_state(self.sol_state[0])
+        env_infos = []
         for k in range(len(self.sol_act)):
             self.env.env.env.mujoco_render_frames = True
             self.env.render()
-            self.env.step(self.sol_act[k])
+            obs, reward, done, env_info = self.env.step(self.sol_act[k])
+            env_infos.append(env_info)
         self.env.env.env.mujoco_render_frames = False
+        return env_infos
+
+
+    def animate_and_gather_path(self):
+        from mjrl.utils import tensor_utils
+
+        observations=[]
+        actions=[]
+        rewards=[]
+        env_infos = []
+
+        self.env.reset(self.seed)
+        self.env.set_env_state(self.sol_state[0])
+        for k in range(len(self.sol_act)):
+            self.env.env.env.mujoco_render_frames = True
+            self.env.render()
+            act = self.sol_act[k]
+            obs, reward, done, env_info = self.env.step(act)
+            observations.append(obs)
+            actions.append(act)
+            rewards.append(reward)
+            env_infos.append(env_info)
+        self.env.env.env.mujoco_render_frames = False
+
+        path = dict(
+            observations=np.array(observations),
+            actions=np.array(actions),
+            rewards=np.array(rewards),
+            env_infos=tensor_utils.stack_tensor_dict_list(env_infos),
+            terminated=done)
+        return path
