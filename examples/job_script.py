@@ -20,15 +20,17 @@ import os
 # =======================================
 # Get command line arguments
 parser = argparse.ArgumentParser(description='Trajectory Optimization with filtered MPPI')
-parser.add_argument('--output', type=str, required=True, help='location to store results')
-parser.add_argument('--config', type=str, required=True, help='path to job data with exp params')
+parser.add_argument('-o', '--output', type=str, required=True, help='location to store results')
+parser.add_argument('-c', '--config', type=str, required=True, help='path to job data with exp params')
+parser.add_argument('-i', '--include', type=str, required=False, default=None, help='package to include')
 args = parser.parse_args()
 OUT_DIR = args.output
 if not os.path.exists(OUT_DIR):
     os.mkdir(OUT_DIR)
 with open(args.config, 'r') as f:
     job_data = eval(f.read())
-
+if args.include:
+    exec("import "+args.include)
 # Unpack args and make files for easy access
 ENV_NAME = job_data['env_name']
 PICKLE_FILE = OUT_DIR + '/trajectories.pickle'
