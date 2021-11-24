@@ -85,7 +85,7 @@ class MPPI(Trajectory):
         return scores
 
     def do_rollouts(self, seed):
-        paths = gather_paths_parallel(self.env.env_id,
+        paths = gather_paths_parallel(self.env,
                                       self.sol_state[-1],
                                       self.act_sequence,
                                       self.filter_coefs,

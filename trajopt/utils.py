@@ -4,17 +4,19 @@ Utility functions useful for TrajOpt algos
 
 import numpy as np
 import multiprocessing as mp
+import concurrent.futures
+from mjrl.samplers.core import _try_multiprocess_mp, _try_multiprocess_cf
 from trajopt import tensor_utils
 from trajopt.envs.utils import get_environment
 
-def do_env_rollout(env_id, start_state, act_list):
+def do_env_rollout(env, start_state, act_list, env_kwargs=None):
     """
-        1) Construct env with env_id and set it to start_state.
+        1) Construt env based on desired behavior and set to start_state.
         2) Generate rollouts using act_list.
            act_list is a list with each element having size (H,m).
            Length of act_list is the number of desired rollouts.
     """
-    e = get_environment(env_id)
+    e = get_environment(env, env_kwargs)
     e.reset()
     e.real_env_step(False)
     paths = []
@@ -70,7 +72,8 @@ def generate_perturbed_actions(base_act, filter_coefs):
     return base_act + eps
 
 
-def generate_paths(env_id, start_state, N, base_act, filter_coefs, base_seed):
+def generate_paths(env, start_state, N, base_act, filter_coefs, 
+                    base_seed, env_kwargs, *args, **kwargs):
     """
     first generate enough perturbed actions
     then do rollouts with generated actions
@@ -81,57 +84,35 @@ def generate_paths(env_id, start_state, N, base_act, filter_coefs, base_seed):
     for i in range(N):
         act = generate_perturbed_actions(base_act, filter_coefs)
         act_list.append(act)
-    paths = do_env_rollout(env_id, start_state, act_list)
+    paths = do_env_rollout(env, start_state, act_list, env_kwargs)
     return paths
 
 
-def generate_paths_star(args_list):
-    return generate_paths(*args_list)
+def gather_paths_parallel(env, start_state, base_act, filter_coefs, base_seed, 
+                          paths_per_cpu, num_cpu=None, env_kwargs=None,
+                          *args, **kwargs):
+    num_cpu = 1 if num_cpu is None else num_cpu
+    num_cpu = mp.cpu_count() if num_cpu == 'max' else num_cpu
+    assert type(num_cpu) == int
 
+    if num_cpu == 1:
+        input_dict = dict(env=env, start_state=start_state, N=paths_per_cpu, env_kwargs=env_kwargs,
+                          base_act=base_act, filter_coefs=filter_coefs, base_seed=base_seed)
+        return generate_paths(**input_dict)
 
-def gather_paths_parallel(env_id, start_state, base_act, filter_coefs, base_seed, paths_per_cpu, num_cpu=None):
-    num_cpu = mp.cpu_count() if num_cpu is None else num_cpu
-    args_list = []
+    # do multiprocessing if necessary
+    input_dict_list = []
     for i in range(num_cpu):
         cpu_seed = base_seed + i*paths_per_cpu
-        args_list_cpu = [env_id, start_state, paths_per_cpu, base_act, filter_coefs, cpu_seed]
-        args_list.append(args_list_cpu)
+        input_dict = dict(env=env, start_state=start_state, N=paths_per_cpu, env_kwargs=env_kwargs,
+                          base_act=base_act, filter_coefs=filter_coefs, base_seed=cpu_seed)
+        input_dict_list.append(input_dict)
 
-    # do multiprocessing
-    results = _try_multiprocess(args_list, num_cpu, max_process_time=300, max_timeouts=4)
+    results = _try_multiprocess_cf(func=generate_paths, input_dict_list=input_dict_list,
+                                    num_cpu=num_cpu, max_process_time=300, max_timeouts=4)
     paths = []
     for result in results:
         for path in result:
             paths.append(path)
 
     return paths
-
-
-def _try_multiprocess(args_list, num_cpu, max_process_time, max_timeouts):
-    # Base case
-    if max_timeouts == 0:
-        return None
-
-    if num_cpu == 1:
-        results = [generate_paths_star(args_list[0])]  # dont invoke multiprocessing unnecessarily
-
-    else:
-        pool = mp.Pool(processes=num_cpu, maxtasksperchild=1)
-        parallel_runs = [pool.apply_async(generate_paths_star,
-                                         args=(args_list[i],)) for i in range(num_cpu)]
-        try:
-            results = [p.get(timeout=max_process_time) for p in parallel_runs]
-        except Exception as e:
-            print(str(e))
-            print("Timeout Error raised... Trying again")
-            pool.close()
-            pool.terminate()
-            pool.join()
-            return _try_multiprocess(args_list, num_cpu, max_process_time, max_timeouts - 1)
-
-        pool.close()
-        pool.terminate()
-        pool.join()
-
-    return results
-
