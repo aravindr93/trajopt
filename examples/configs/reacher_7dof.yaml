@@ -1,0 +1,36 @@
+defaults:
+    - override hydra/launcher: local
+    - override hydra/output: local
+
+# problem description
+env_name        :   "trajopt_reacher-v0"
+seed            :   12345
+traj_length     :   75
+num_traj        :   2
+visualize       :   True
+
+# Experiment notes
+exp_notes       :   "7-DOF Sawyer arm reaching various spatial goals for the end effector."
+
+# sampling properties
+plan_horizon    :   16
+paths_per_cpu   :   32
+num_cpu         :   1
+
+# MPPI parameters
+num_iter        :   1
+kappa           :   5.0
+gamma           :   1.0
+default_act     :   "mean"
+filter:
+    beta_0      :   0.25
+    beta_1      :   0.8
+    beta_2      :   0.0
+
+# Outputs
+job_name        :   "reacher_7dof_test"
+
+hydra:
+    job:
+        name    :   "reacher_7dof_test"
+

@@ -1,0 +1,36 @@
+defaults:
+    - override hydra/launcher: local
+    - override hydra/output: local
+
+# problem description
+env_name        :   "mjrl_point_mass-v0"
+seed            :   12345
+traj_length     :   25
+num_traj        :   5
+visualize       :   True
+
+# Experiment notes
+exp_notes       :   "Toy experiment with point mass from mjrl."
+
+# sampling properties
+plan_horizon    :   5
+paths_per_cpu   :   32
+num_cpu         :   1
+
+# MPPI parameters
+num_iter        :   1
+kappa           :   2.0
+gamma           :   1.0
+default_act     :   "mean"
+filter:
+    beta_0      :   0.1
+    beta_1      :   0.0
+    beta_2      :   0.0
+
+# Outputs
+job_name        :   "test_job"
+
+hydra:
+    job:
+        name    :   "test_job"
+        # chdir   :   True

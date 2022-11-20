@@ -8,23 +8,33 @@ import numpy as np
 from trajopt.algos.trajopt_base import Trajectory
 from trajopt.utils import gather_paths_parallel
 
+
 class MPPI(Trajectory):
-    def __init__(self, env, H, paths_per_cpu,
-                 num_cpu=1,
-                 kappa=1.0,
-                 gamma=1.0,
-                 mean=None,
-                 filter_coefs=None,
-                 default_act='repeat',
-                 warmstart=True,
-                 seed=123,
-                 ):
+    def __init__(
+        self,
+        env,
+        H,
+        paths_per_cpu,
+        num_cpu=1,
+        kappa=1.0,
+        gamma=1.0,
+        mean=None,
+        filter_coefs=None,
+        default_act="repeat",
+        warmstart=True,
+        seed=123,
+    ):
         self.env, self.seed = env, seed
         self.n, self.m = env.observation_dim, env.action_dim
         self.H, self.paths_per_cpu, self.num_cpu = H, paths_per_cpu, num_cpu
         self.warmstart = warmstart
 
-        self.mean, self.filter_coefs, self.kappa, self.gamma = mean, filter_coefs, kappa, gamma
+        self.mean, self.filter_coefs, self.kappa, self.gamma = (
+            mean,
+            filter_coefs,
+            kappa,
+            gamma,
+        )
         if mean is None:
             self.mean = np.zeros(self.m)
         if filter_coefs is None:
@@ -48,11 +58,11 @@ class MPPI(Trajectory):
         num_traj = len(paths)
         act = np.array([paths[i]["actions"] for i in range(num_traj)])
         R = self.score_trajectory(paths)
-        S = np.exp(self.kappa*(R-np.max(R)))
+        S = np.exp(self.kappa * (R - np.max(R)))
 
         # blend the action sequence
-        weighted_seq = S*act.T
-        act_sequence = np.sum(weighted_seq.T, axis=0)/(np.sum(S) + 1e-6)
+        weighted_seq = S * act.T
+        act_sequence = np.sum(weighted_seq.T, axis=0) / (np.sum(S) + 1e-6)
         self.act_sequence = act_sequence
 
     def advance_time(self, act_sequence=None):
@@ -69,7 +79,7 @@ class MPPI(Trajectory):
         # get updated action sequence
         if self.warmstart:
             self.act_sequence[:-1] = act_sequence[1:]
-            if self.default_act == 'repeat':
+            if self.default_act == "repeat":
                 self.act_sequence[-1] = self.act_sequence[-2]
             else:
                 self.act_sequence[-1] = self.mean.copy()
@@ -81,23 +91,24 @@ class MPPI(Trajectory):
         for i in range(len(paths)):
             scores[i] = 0.0
             for t in range(paths[i]["rewards"].shape[0]):
-                scores[i] += (self.gamma**t)*paths[i]["rewards"][t]
+                scores[i] += (self.gamma**t) * paths[i]["rewards"][t]
         return scores
 
     def do_rollouts(self, seed):
-        paths = gather_paths_parallel(self.env,
-                                      self.sol_state[-1],
-                                      self.act_sequence,
-                                      self.filter_coefs,
-                                      seed,
-                                      self.paths_per_cpu,
-                                      self.num_cpu,
-                                      )
+        paths = gather_paths_parallel(
+            env=self.env.env_id,
+            start_state=self.sol_state[-1],
+            base_act=self.act_sequence,
+            filter_coefs=self.filter_coefs,
+            base_seed=seed,
+            paths_per_cpu=self.paths_per_cpu,
+            num_cpu=self.num_cpu,
+        )
         return paths
 
     def train_step(self, niter=1):
         t = len(self.sol_state) - 1
         for _ in range(niter):
-            paths = self.do_rollouts(self.seed+t)
+            paths = self.do_rollouts(self.seed + t)
             self.update(paths)
         self.advance_time()

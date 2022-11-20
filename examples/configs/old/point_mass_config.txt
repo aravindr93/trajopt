@@ -6,7 +6,7 @@
     'num_iter'          :       1,
     'plan_horizon'      :       5,
     'paths_per_cpu'     :       32,
-    'num_cpu'           :       1,
+    'num_cpu'           :       4,
     'filter'            :       {'beta_0': 0.1, 'beta_1': 0.0, 'beta_2': 0.0},
     'kappa'             :       2.0,
     'gamma'             :       1.0,

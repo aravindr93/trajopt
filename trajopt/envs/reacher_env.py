@@ -18,7 +18,7 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.target_sid = -1
 
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/assets/sawyer.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, curr_dir + "/assets/sawyer.xml", 2)
         utils.EzPickle.__init__(self)
         self.observation_dim = 26
         self.action_dim = 7
@@ -31,20 +31,23 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         hand_pos = self.data.site_xpos[self.hand_sid]
         target_pos = self.data.site_xpos[self.target_sid]
         l1_dist = np.sum(np.abs(hand_pos - target_pos))
-        l2_dist = np.linalg.norm(hand_pos-target_pos)
-        reward = - l1_dist - 5.0 * l2_dist
+        l2_dist = np.linalg.norm(hand_pos - target_pos)
+        reward = -l1_dist - 5.0 * l2_dist
         ob = self.get_obs()
-        self.env_timestep += 1   # keep track of env timestep for timed events
+        self.env_timestep += 1  # keep track of env timestep for timed events
         self.trigger_timed_events()
         return ob, reward, False, self.get_env_infos()
 
     def get_obs(self):
-        return np.concatenate([
-            self.data.qpos.flat,
-            self.data.qvel.flat,
-            self.data.site_xpos[self.hand_sid],
-            self.data.site_xpos[self.hand_sid] - self.data.site_xpos[self.target_sid],
-        ])
+        return np.concatenate(
+            [
+                self.data.qpos.flat,
+                self.data.qvel.flat,
+                self.data.site_xpos[self.hand_sid],
+                self.data.site_xpos[self.hand_sid]
+                - self.data.site_xpos[self.target_sid],
+            ]
+        )
 
     # --------------------------------
     # resets and randomization
@@ -80,17 +83,21 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def get_env_state(self):
         target_pos = self.model.site_pos[self.target_sid].copy()
-        return dict(qp=self.data.qpos.copy(), qv=self.data.qvel.copy(),
-                    qa=self.data.qacc.copy(),
-                    target_pos=target_pos, timestep=self.env_timestep)
+        return dict(
+            qp=self.data.qpos.copy(),
+            qv=self.data.qvel.copy(),
+            qa=self.data.qacc.copy(),
+            target_pos=target_pos,
+            timestep=self.env_timestep,
+        )
 
     def set_env_state(self, state):
         self.sim.reset()
-        qp = state['qp'].copy()
-        qv = state['qv'].copy()
-        qa = state['qa'].copy()
-        target_pos = state['target_pos']
-        self.env_timestep = state['timestep']
+        qp = state["qp"].copy()
+        qv = state["qv"].copy()
+        qa = state["qa"].copy()
+        target_pos = state["target_pos"]
+        self.env_timestep = state["timestep"]
         self.model.site_pos[self.target_sid] = target_pos
         self.sim.forward()
         self.data.qpos[:] = qp
@@ -114,7 +121,10 @@ class Reacher7DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
 
 class ContinualReacher7DOFEnv(Reacher7DOFEnv):
-
     def trigger_timed_events(self):
-        if self.env_timestep % 50 == 0 and self.env_timestep > 0 and self.real_step is True:
+        if (
+            self.env_timestep % 50 == 0
+            and self.env_timestep > 0
+            and self.real_step is True
+        ):
             self.target_reset()

@@ -13,27 +13,29 @@ def flatten_tensors(tensors):
 def unflatten_tensors(flattened, tensor_shapes):
     tensor_sizes = list(map(np.prod, tensor_shapes))
     indices = np.cumsum(tensor_sizes)[:-1]
-    return [np.reshape(pair[0], pair[1]) for pair in zip(np.split(flattened, indices), tensor_shapes)]
+    return [
+        np.reshape(pair[0], pair[1])
+        for pair in zip(np.split(flattened, indices), tensor_shapes)
+    ]
 
 
-def pad_tensor(x, max_len, mode='zero'):
+def pad_tensor(x, max_len, mode="zero"):
     padding = np.zeros_like(x[0])
-    if mode == 'last':
+    if mode == "last":
         padding = x[-1]
-    return np.concatenate([
-        x,
-        np.tile(padding, (max_len - len(x),) + (1,) * np.ndim(x[0]))
-    ])
+    return np.concatenate(
+        [x, np.tile(padding, (max_len - len(x),) + (1,) * np.ndim(x[0]))]
+    )
 
 
 def pad_tensor_n(xs, max_len):
     ret = np.zeros((len(xs), max_len) + xs[0].shape[1:], dtype=xs[0].dtype)
     for idx, x in enumerate(xs):
-        ret[idx][:len(x)] = x
+        ret[idx][: len(x)] = x
     return ret
 
 
-def pad_tensor_dict(tensor_dict, max_len, mode='zero'):
+def pad_tensor_dict(tensor_dict, max_len, mode="zero"):
     keys = list(tensor_dict.keys())
     ret = dict()
     for k in keys:
@@ -88,7 +90,12 @@ def stack_tensor_dict_list(tensor_dict_list):
 
 def concat_tensor_list_subsample(tensor_list, f):
     return np.concatenate(
-        [t[np.random.choice(len(t), int(np.ceil(len(t) * f)), replace=False)] for t in tensor_list], axis=0)
+        [
+            t[np.random.choice(len(t), int(np.ceil(len(t) * f)), replace=False)]
+            for t in tensor_list
+        ],
+        axis=0,
+    )
 
 
 def concat_tensor_dict_list_subsample(tensor_dict_list, f):

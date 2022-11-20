@@ -4,6 +4,7 @@ Base trajectory class
 
 import numpy as np
 
+
 class Trajectory:
     def __init__(self, env, H=32, seed=123):
         self.env, self.seed = env, seed
@@ -38,7 +39,7 @@ class Trajectory:
                 self.env.env.env.mujoco_render_frames = True
             except AttributeError:
                 self.env.render()
-            self.env.set_env_state(self.sol_state[t+k])
+            self.env.set_env_state(self.sol_state[t + k])
             self.env.step(act[k])
             print(self.env.env_timestep)
             print(self.env.real_step)
@@ -61,7 +62,7 @@ class Trajectory:
         self.env.reset(self.seed)
         self.env.set_env_state(self.sol_state[0])
         for t in range(len(self.sol_act)):
-            frame_t = generate_frame(self.env, frame_size=(640,480), camera_name=None)
+            frame_t = generate_frame(self.env, frame_size=(640, 480), camera_name=None)
             frames.append(frame_t.copy())
             self.env.step(self.sol_act[t])
         return frames
@@ -69,10 +70,17 @@ class Trajectory:
 
 def generate_frame(e, frame_size, camera_name):
     env_id = e.env_id
-    if env_id.startswith('dmc'):
-        frame = e.env.unwrapped.render(mode='rgb_array', width=frame_size[0], height=frame_size[1])
+    if env_id.startswith("dmc"):
+        frame = e.env.unwrapped.render(
+            mode="rgb_array", width=frame_size[0], height=frame_size[1]
+        )
     else:
-        frame = e.env.unwrapped.sim.render(width=frame_size[0], height=frame_size[1],
-                                            mode='offscreen', camera_name=camera_name, device_id=0)
-        frame = frame[::-1,:,:]
+        frame = e.env.unwrapped.sim.render(
+            width=frame_size[0],
+            height=frame_size[1],
+            mode="offscreen",
+            camera_name=camera_name,
+            device_id=0,
+        )
+        frame = frame[::-1, :, :]
     return frame.copy()
